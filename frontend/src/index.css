@@ -1,0 +1,18 @@
+body {
+  margin: 0;
+  padding: 0;
+  font-family: sans-serif;
+}
+
+#root .header-wrapper {
+	min-height: 450px; 
+	padding: 1em 0em;
+	margin-bottom: 20px;
+}
+
+#root .header-1 {
+	font-size: 4em; font-weight: normal; margin-bottom: 0px; margin-top: 2em;
+}
+#root .header-2 {
+	font-size: 1.7em; font-weight: normal;
+}
