@@ -5,12 +5,16 @@
   "dependencies": {
     "react": "^16.0.0",
     "react-dom": "^16.0.0",
+    "react-modal": "^3.1.4",
+    "react-moment": "^0.6.8",
     "react-redux": "^5.0.6",
     "react-router-dom": "^4.2.2",
     "react-scripts": "1.0.14",
+    "react-timestamp": "^4.3.1",
     "readux": "^1.0.0",
     "semantic-ui-css": "^2.2.12",
-    "semantic-ui-react": "^0.75.1"
+    "semantic-ui-react": "^0.75.1",
+    "uuid": "^3.1.0"
   },
   "scripts": {
     "start": "react-scripts start",

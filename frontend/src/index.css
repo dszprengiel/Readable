@@ -3,6 +3,136 @@ body {
   padding: 0;
   font-family: sans-serif;
 }
+.postDetail .postTitle {
+	font-size: 2rem;
+	margin: 10px;
+}
+.postDetail p {
+	font-size: 1.3rem;
+	margin-top: 20px;
+}
+.overlay {
+  position: fixed;
+  top: 0px;
+  left: 0px;
+  right: 0px;
+  bottom: 0px;
+  background-color: rgba(255, 255, 255, 0.75);
+}
+
+.modal {
+  position: absolute;
+  top: 40px;
+  left: 200px;
+  right: 200px;
+  bottom: 40px;
+  border: 1px solid rgb(204, 204, 204);
+  background: rgba(0,0,0,.87);
+  overflow: auto;
+  border-radius: 4px;
+  outline: none;
+  padding: 20px;
+  border-radius: 3px;
+  box-shadow: 0 3px 8px 0 rgba(0,0,0,.24), 0 3px 12px 0 rgba(0,0,0,.12);
+  min-width: 500px;
+}
+
+.modal .ui.form, .modal .ui.form .field>label {
+	font-size: 16px;
+}
+.modal .ui.form .field select {
+	-webkit-appearance: none;
+	-moz-appearance: none;
+	appearance: none;
+	padding: .67857143em 1em;
+}
+
+.sorting {
+	float:  right;
+}
+.sorting a {
+	cursor:  pointer;
+}
+.sorting a.active {
+	color: orange;
+	text-decoration: underline;
+}
+.timestamp {
+	font-size:  80%;
+}
+.midcol {
+    float: left;
+    margin-right: 7px;
+    margin-left: 7px;
+    background: transparent;
+    overflow: hidden;
+    width: 4.1ex;
+    font-weight: bold;
+        font-size: small;
+}
+.midcol .arrow {
+    margin: 2px 0px 0px 0px;
+    width: 100%;
+    height: 14px;
+    display: block;
+    cursor: pointer;
+    background-position: center center;
+    background-repeat: no-repeat;
+    width: 15px;
+    margin-left: auto;
+    margin-right: auto;
+    outline: none;
+}
+.midcol .arrow.up {
+    background: url(//b.thumbs.redditmedia.com/mhvsls4ElhLDDABIQOrKuWnil7I6KwLh60l4ZbeHnHY.png);
+    background-position: -40px -80px;
+    height: 16px!important;
+    width: 16px!important;
+}
+.midcol .arrow.down {
+    background: url(//b.thumbs.redditmedia.com/mhvsls4ElhLDDABIQOrKuWnil7I6KwLh60l4ZbeHnHY.png);
+    background-position: -60px -80px;
+    height: 16px!important;
+    width: 16px!important;
+}
+
+.midcol .score {
+    text-align: center;
+    color: #c6c6c6;
+}
+
+.midcol .score.likes, .score.dislikes {
+    display: none;
+}
+
+.ui.card>.content>.header, .ui.cards>.card>.content>.header {
+	margin-top: 8px !important;
+}
+
+#comments {
+	margin-top: 20px;
+}
+#comments .caption {
+    padding-bottom: 3rem;
+}
+
+#comments p.caption {
+    letter-spacing: 0.25rem;
+    font-size: 2rem;
+    padding-bottom: 1rem;
+    color: #9F9F9E;
+    font-variant: small-caps;
+    font-variant: all-small-caps;
+}
+#comments ul {
+    list-style: none;
+}
+#comments .author {
+    font-weight: 700;
+}
+#comments p {
+    padding: 0 0 3rem;
+}
 
 #root .header-wrapper {
 	min-height: 450px; 
@@ -16,3 +146,4 @@ body {
 #root .header-2 {
 	font-size: 1.7em; font-weight: normal;
 }
+

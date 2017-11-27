@@ -19,23 +19,28 @@ class DisplayCategories extends Component {
 	}
 	render() {
 		return (
-			<ul>
-				{
-					this.state.categories.map((category) => (
-						<li>
-							<NavLink
-							    to={category.path === 'SHOW_ALL' ? '/' : `/${ category.path }`}
-							    activeStyle={{
-							      textDecoration: 'none',
-							      color: 'black'
-							    }}
-							  >
-							  {category.name}
-							</NavLink>
-						</li>
-					))
-				}
-			</ul>
+			<div>
+				<h3 className="heading">Categories</h3>
+				<div className="ui vertical buttons">
+					{
+						this.state.categories.map((category) => (
+
+								<NavLink
+										key={category.name}
+								    to={category.path === 'SHOW_ALL' ? '/' : `/${ category.path }/`}
+								    className='ui button huge'
+								    activeStyle={{
+								      color: 'white'
+								    }}
+								    activeClassName='orange'
+								  >
+								  {category.name}
+								</NavLink>
+				
+						))
+					}
+				</div>
+			</div>
 		)
 	}
 }
