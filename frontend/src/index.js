@@ -5,11 +5,19 @@ import 'semantic-ui-css/semantic.min.css';
 import App from './App';
 import PostDetail from './components/PostDetail';
 import { BrowserRouter as Router, Route } from 'react-router-dom';
+import { createStore, applyMiddleware } from 'redux';
+import rootReducer from './reducers'; 
+import { Provider } from 'react-redux';
+import thunk from 'redux-thunk';
+
+const store = createStore(rootReducer, applyMiddleware(thunk));
 
 ReactDOM.render(
-	<Router>
-		<div>
-			<Route path="/:filter?/" exact render={(props) => <App {...props} />} />
-			<Route path="/*/:id" render={(props) => <PostDetail {...props} />} />		
-		</div>
-	</Router>, document.getElementById('root'));
+	<Provider store={store}>
+		<Router>
+			<div>
+				<Route path="/:filter?/" exact render={(props) => <App {...props} />} />
+				<Route path="/*/:id" render={(props) => <PostDetail {...props} />} />		
+			</div>
+		</Router>
+	</Provider>, document.getElementById('root'));

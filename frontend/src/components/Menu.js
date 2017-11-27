@@ -14,18 +14,27 @@ class Menu extends Component {
 	      body: '',
 	      category: '',
 	      type: '',
-	      message: ''
+	      message: '',
+	      error: false
 	    };
 	    this.handleSubmit = this.handleSubmit.bind(this);
 	}
 	closeNewPostModal = () => {
 		this.setState({
-			newPostModalOpen: false
+			newPostModalOpen: false,
+			type: '',
+			error: false
 		})
 	}
 	handleSubmit(e) {
 		e.preventDefault();
-		
+		const { title, body, author, category } = this.state;
+		if ( title === '' || author === '' || body === '' || category === '' ) {
+			this.setState({error: true});
+			return;
+		}
+
+		this.setState({error: false});
 		let formData = {
 			id: uuid(),
 			timestamp: Date.now(),
@@ -42,11 +51,10 @@ class Menu extends Component {
 		  xmlhttp.onreadystatechange = function() {
 		    if (xmlhttp.readyState === 4) {
 		      if (xmlhttp.status === 200 && xmlhttp.statusText === 'OK') {
-		        _this.setState({ type: 'success', message: 'The post has been submitted. Thanks!' });
-		        //e.target.classList.add('success');
+		        _this.setState({ type: 'success', title: '', body: '', author: '', category: '' });
 		      }
 		      else {
-		        _this.setState({ type: 'danger', message: 'Sorry, there has been an error. Please try again later.' });
+		        _this.setState({ type: 'danger' });
 		      }
 		    }
 		  };
@@ -95,35 +103,58 @@ class Menu extends Component {
         	          <div className="twelve wide computer sixteen wide mobile column">
         	 						<div className="column rendered-example collections-form-variations-form-example-inverted">
         								<div className="ui inverted segment">
-        									<form className="ui inverted form" onSubmit={this.handleSubmit}>
+        									<form className={`ui inverted form ${this.state.error ? 'error' : ''} ${this.state.type === 'success' ? 'success' : 'error'}`} onSubmit={this.handleSubmit}>
         											{
         												this.state.type === 'success' ?
 
         													<div className="ui success message">
         														<div className="content">
-        															<div className="header">Form Completed</div>
-        															<p>You're all signed up for the newsletter</p>
+        															<div className="header">Form Submitted</div>
+        															<p>The post has been submitted. Thanks!</p>
         														</div>
         													</div>
 
         													: ''
         											
         											}
+        											{
+        												this.state.type === 'danger' ?
+
+        													<div className="ui success message">
+        														<div className="content">
+        															<div className="header">Error</div>
+        															<p>Sorry, there has been an error. Please try again later.</p>
+        														</div>
+        													</div>
+
+        													: ''
+        											
+        											}
+        											{
+        												this.state.error ?
+        												<div className="ui error message">
+        													<div className="content">
+        														<div className="header">Error</div>
+        														<p>Please fill out all off the fields</p>
+        													</div>
+        												</div>
+        												: ''
+        											}
         											<div className="field">
         												<label>Title</label>
-        												<div className="ui input"><input type="text" placeholder="Title" onChange={ (e) => this.setState({ title: e.target.value }) } /></div>
+        												<div className="ui input"><input type="text" placeholder="Title" onChange={ (e) => this.setState({ title: e.target.value }) } value={this.state.title} /></div>
         											</div>
         											<div className="field">
         												<label>Author</label>
-        												<div className="ui input"><input type="text" placeholder="Author" onChange={ (e) => this.setState({ author: e.target.value }) } /></div>
+        												<div className="ui input"><input type="text" placeholder="Author" onChange={ (e) => this.setState({ author: e.target.value }) } value={this.state.author} /></div>
         											</div>
         											<div className="field">
         												<label>Post Body</label>
-        												<div className="ui input"><input type="text" placeholder="Post Body" onChange={ (e) => this.setState({ body: e.target.value }) } /></div>
+        												<div className="ui input"><input type="text" placeholder="Post Body" onChange={ (e) => this.setState({ body: e.target.value }) } value={this.state.body} /></div>
         											</div>
         											<div className="field">
         												<label>Category</label>
-        												<select onChange={ (e) => this.setState({ category: e.target.value }) }>
+        												<select onChange={ (e) => this.setState({ category: e.target.value }) } value={this.state.category}>
         													<option value="">Select category</option>
         													{
         														this.state.categories.map((category) => (

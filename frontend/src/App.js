@@ -3,6 +3,10 @@ import './App.css';
 import DisplayCategories from './components/DisplayCategories';
 import Posts from './components/Posts';
 import Menu from './components/Menu';
+import Header from './components/Header';
+import { connect } from 'react-redux';
+import { addRecipe, removeFromCalendar } from './actions';
+
 
 class App extends Component {
   render() {
@@ -12,10 +16,7 @@ class App extends Component {
           <div className="ui container">
             <Menu />
           </div>
-          <div className="ui text container">
-            <h1 className="ui inverted header header-1">Readable</h1>
-            <h2 className="ui inverted header header-2">Read whatever you want when you want to.</h2>
-          </div>
+         <Header />
         </div>
         <div className="ui padded grid">
           <div className="two wide computer sixteen wide mobile column">

@@ -1,9 +1,10 @@
 import React, { Component } from 'react';
 import DisplayCategories from './DisplayCategories';
 import Menu from './Menu';
+import Comments from './Comments';
+import Header from './Header';
 import { Redirect } from 'react-router-dom';
 import ReactModal from 'react-modal';
-import uuid from 'uuid/v4';
 
 class PostDetail extends Component {
 	constructor(props) {
@@ -41,18 +42,9 @@ class PostDetail extends Component {
 	}
 	edit = () => {
 		this.setState({
-			editPostModalOpen: true
-		})
-	}
-	getComments = () => {
-		fetch(
-		    'http://localhost:3001/posts/' + this.props.match.params.id + '/comments',
-		    {
-		        headers: { 'Authorization': 'readable', 'mode': 'cors' }
-		    }
-		).then((response) => {if (response.ok) {return response.json();}})
-		.then((data) => { 
-			this.setState({comments: data});
+			editPostModalOpen: true,
+			title: this.state.details.title,
+			body: this.state.details.body
 		});
 	}
 	delete = () => {
@@ -64,17 +56,60 @@ class PostDetail extends Component {
 		    }
 		).then((response) => {if (response.ok) {this.setState({redirect: true})}});
 	}
-	handleCommentSubmit = (e) => {
-			e.preventDefault();
-			let formData = {
-				id: uuid(),
-				timestamp: Date.now(),
-				body: this.state.newComment_body,
-				author: this.state.newComment_author,
-				parentId: this.state.details.id
-			};
+	upVote(id) {
+		fetch(
+		    'http://localhost:3001/posts/' + id,
+		    {
+		        headers: { 
+		        	'Authorization': 'readable', 
+		        	'mode': 'cors',
+		        	'Accept': 'application/json, text/plain, */*',
+		        	'Content-Type': 'application/json'
+		        },
+		        method: 'POST',
+		        body: JSON.stringify({option: 'upVote'})
+		    }
+		).then((response) => {if (response.ok) {return response.json();}})
+	  .then((data) => { 
+	  	this.getPostDetails();
+	  	
+	  	
+	  });
+	}
+	downVote(id) {
+		fetch(
+		    'http://localhost:3001/posts/' + id,
+		    {
+		        headers: { 
+		        	'Authorization': 'readable', 
+		        	'mode': 'cors',
+		        	'Accept': 'application/json, text/plain, */*',
+		        	'Content-Type': 'application/json'
+		        },
+		        method: 'POST',
+		        body: JSON.stringify({option: 'downVote'})
+		    }
+		).then((response) => {if (response.ok) {return response.json();}})
+	  .then((data) => { 
+	  	this.getPostDetails();
+	  });
+	}
+	getPostDetails = () => {
+		  fetch(
+		      'http://localhost:3001/posts/' + this.props.match.params.id,
+		      {
+		          headers: { 'Authorization': 'readable', 'mode': 'cors' }
+		      }
+		  ).then((response) => {if (response.ok) {return response.json();}})
+		  .then((data) => { 
+		  	this.setState({details: data});
+		  	//if ( data.commentCount > 0 ) this.getComments();
+			});
+	}
+	handleSubmit = (e) => {
+		e.preventDefault();
 			fetch(
-			    'http://localhost:3001/comments',
+			    'http://localhost:3001/posts/' + this.state.details.id,
 			    {
 			        headers: { 
 			        	'Authorization': 'readable', 
@@ -82,25 +117,21 @@ class PostDetail extends Component {
 			        	'Accept': 'application/json, text/plain, */*',
 			        	'Content-Type': 'application/json'
 			        },
-			        method: 'POST',
-			        body: JSON.stringify(formData)
+			        method: 'PUT',
+			        body: JSON.stringify({title: this.state.title, body: this.state.body})
 			    }
 			).then((response) => {if (response.ok) {return response.json();}})
 		  .then((data) => { 
-		  	this.getComments();
+		  	this.setState({
+		  		details: data,
+		  		editPostModalOpen: false
+		  	})
+
 		  });
 	}
 	componentDidMount() {
-	  fetch(
-	      'http://localhost:3001/posts/' + this.props.match.params.id,
-	      {
-	          headers: { 'Authorization': 'readable', 'mode': 'cors' }
-	      }
-	  ).then((response) => {if (response.ok) {return response.json();}})
-	  .then((data) => { 
-	  	this.setState({details: data});
-	  	if ( data.commentCount > 0 ) this.getComments();
-		});
+	  
+	  this.getPostDetails();
 
 	  fetch(
 	      'http://localhost:3001/categories',
@@ -126,10 +157,7 @@ class PostDetail extends Component {
 			          <div className="ui container">
 			            <Menu />
 			          </div>
-			          <div className="ui text container">
-			            <h1 className="ui inverted header header-1">Readable</h1>
-			            <h2 className="ui inverted header header-2">Read whatever you want when you want to.</h2>
-			          </div>
+			          <Header />
 			        </div>
 			        <div className="ui padded grid">
 			          <div className="two wide computer sixteen wide mobile column">
@@ -145,32 +173,7 @@ class PostDetail extends Component {
 			             <p>Written by { author } on {readable_date}</p>
 			             <p>{ body }</p>
 
-			             <hr />
-									 <h3>Leave a comment</h3>
-			             <form className="ui form" onSubmit={this.handleCommentSubmit}>
-			             		<div className="field">
-			             			<label>Author</label>
-			             			<div className="ui input"><input type="text" placeholder="Author" onChange={ (e) => this.setState({ newComment_author : e.target.value }) } /></div>
-			             		</div>
-			             		<div className="field">
-			             			<label>Comment</label>
-			             			<div className="ui input"><input type="text" placeholder="Comment" onChange={ (e) => this.setState({ newComment_body : e.target.value }) } /></div>
-			             		</div>
-			             		<button type="submit" className="ui button">Submit</button>
-			             	</form>
-			             	<div id="comments">
-			             		<p className="caption">{commentCount} Comments</p>
-	  		              <ul>
-	  		              {
-	  		              	this.state.comments.map((comment) => (
-	  		              		<li className="comment" key={comment.id}>
-		              		    		<span className="author">{comment.author}</span> <span className="comment-meta">({`${new Date(comment.timestamp).toLocaleString()}`})</span>
-		              		    		<p>{comment.body}</p>
-		              		    </li>
-	  		              	))
-	  		              }
-	  		              </ul>
-  		              </div>
+			             	<Comments count={commentCount} postId={this.props.match.params.id} />
 			          </div>
 			        </div>
 			        			  <ReactModal
@@ -199,26 +202,11 @@ class PostDetail extends Component {
 			                											}
 			                											<div className="field">
 			                												<label>Title</label>
-			                												<div className="ui input"><input type="text" placeholder="Title" onChange={ (e) => this.setState({ title: e.target.value }) } value={title} /></div>
-			                											</div>
-			                											<div className="field">
-			                												<label>Author</label>
-			                												<div className="ui input"><input type="text" placeholder="Author" onChange={ (e) => this.setState({ author: e.target.value }) } value={author} /></div>
+			                												<div className="ui input"><input type="text" placeholder="Title" onChange={ (e) => this.setState({ title: e.target.value }) } value={this.state.title} /></div>
 			                											</div>
 			                											<div className="field">
 			                												<label>Post Body</label>
-			                												<div className="ui input"><input type="text" placeholder="Post Body" onChange={ (e) => this.setState({ body: e.target.value }) } value={body} /></div>
-			                											</div>
-			                											<div className="field">
-			                												<label>Category</label>
-			                												<select onChange={ (e) => this.setState({ category: e.target.value }) } value={category}>
-			                													<option value="">Select category</option>
-			                													{
-			                														this.state.categories.map((category) => (
-			                																<option key={category.name} value={category.name}>{category.name}</option>											
-			                														))
-			                													}
-			                												</select>
+			                												<div className="ui input"><input type="text" placeholder="Post Body" onChange={ (e) => this.setState({ body: e.target.value }) } value={this.state.body} /></div>
 			                											</div>
 			                										<button type="submit" className="ui button">Submit</button>
 			                									</form>
