@@ -1,11 +1,12 @@
 import React, { Component } from 'react';
 import { NavLink } from 'react-router-dom';
+import { connect } from 'react-redux';
+import { postsFetchData, upDownVote, sortedByScore, sortedByTimestamp } from '../actions';
 
 class Posts extends Component {
 	constructor(props) {
 	    super(props);
 	    this.state = {
-	      posts: [],
 	      sort: 'score',
 	      colors: {
 	      	'react': 'orange',
@@ -15,7 +16,7 @@ class Posts extends Component {
 	    };
 	}
 	componentDidMount() {
-	  fetch(
+	  /*fetch(
 	      'http://localhost:3001/posts',
 	      {
 	          headers: { 'Authorization': 'readable', 'mode': 'cors' }
@@ -25,76 +26,20 @@ class Posts extends Component {
 	  	this.setState({posts: data});
 	  	let sorted = this.state.posts.sort(function(a,b) {return (a.voteScore > b.voteScore) ? -1 : ((b.voteScore > a.voteScore) ? 1 : 0);} );
 	  	this.setState({posts: sorted})
-	  });
-
+	  });*/
+	  this.props.fetchData();
 	}
 	upVote(id) {
-		fetch(
-		    'http://localhost:3001/posts/' + id,
-		    {
-		        headers: { 
-		        	'Authorization': 'readable', 
-		        	'mode': 'cors',
-		        	'Accept': 'application/json, text/plain, */*',
-		        	'Content-Type': 'application/json'
-		        },
-		        method: 'POST',
-		        body: JSON.stringify({option: 'upVote'})
-		    }
-		).then((response) => {if (response.ok) {return response.json();}})
-	  .then((data) => { 
-	  	const items = this.state.posts.map((p) => {
-	  		if ( p.id === data.id ) {
-	  			return data;
-	  		}
-	  		else {
-	  			return p;
-	  		}
-	  	});
-	  	this.setState({posts: items});
-	  	if ( this.state.sort === 'score' ) {
-	  		let sorted = this.state.posts.sort(function(a,b) {return (a.voteScore > b.voteScore) ? -1 : ((b.voteScore > a.voteScore) ? 1 : 0);} );
-	  		this.setState({posts: sorted})
-	  	}
-	  	
-	  });
+		this.props.voteUpDown(id, 'upVote');
+		this.props.fetchData();
 	}
 	downVote(id) {
-		fetch(
-		    'http://localhost:3001/posts/' + id,
-		    {
-		        headers: { 
-		        	'Authorization': 'readable', 
-		        	'mode': 'cors',
-		        	'Accept': 'application/json, text/plain, */*',
-		        	'Content-Type': 'application/json'
-		        },
-		        method: 'POST',
-		        body: JSON.stringify({option: 'downVote'})
-		    }
-		).then((response) => {if (response.ok) {return response.json();}})
-	  .then((data) => { 
-	  	const items = this.state.posts.map((p) => {
-	  		if ( p.id === data.id ) {
-	  			return data;
-	  		}
-	  		else {
-	  			return p;
-	  		}
-	  	});
-	  	this.setState({posts: items});
-	  	if ( this.state.sort === 'score' ) {
-	  		let sorted = this.state.posts.sort(function(a,b) {return (a.voteScore > b.voteScore) ? -1 : ((b.voteScore > a.voteScore) ? 1 : 0);} );
-	  		this.setState({posts: sorted})
-	  	}
-	  });
+		this.props.voteUpDown(id, 'downVote');
+		this.props.fetchData();
 	}
 	sortByScore = (e) => {
 		if (e) e.preventDefault();
-		if ( this.state.sort === 'score' ) return;
-		let sorted = this.state.posts.sort(function(a,b) {return (a.voteScore > b.voteScore) ? -1 : ((b.voteScore > a.voteScore) ? 1 : 0);} );
-		console.log(sorted)
-		this.setState({posts: sorted, sort: 'score'})
+		this.props.sortScore(this.props.posts);
 	}
 	sortByTimestamp = (e) => {
 		e.preventDefault();
@@ -108,7 +53,7 @@ class Posts extends Component {
 				<h3 className="heading">Posts <span className="sorting">Sort by: <a onClick={(e) => this.sortByScore(e)} className={this.state.sort === 'score' ? 'active': ''}>score</a>, <a onClick={(e) => this.sortByTimestamp(e)} className={this.state.sort === 'timestamp' ? 'active': ''}>timestamp</a></span></h3>
 				<div className="ui cards">
 					{
-						this.state.posts.filter(post => {
+						this.props.posts.filter(post => {
 							return this.props.cat ? this.props.cat === post.category : post;
 						})
 						.map((post) => (
@@ -137,4 +82,19 @@ class Posts extends Component {
 	}
 }
 
-export default Posts;
+const mapStateToProps = (state) => {
+	return {
+		posts: state.posts
+	}
+};
+
+const mapDispatchToProps = (dispatch) => {
+    return {
+        fetchData: () => dispatch(postsFetchData()),
+        voteUpDown: (id, option) => dispatch(upDownVote(id, option)),
+        sortScore: (posts) => dispatch(sortedByScore(posts)),
+        sortTimestamp: (posts) => dispatch(sortedByTimestamp(posts))
+    };
+};
+
+export default connect(mapStateToProps, mapDispatchToProps)(Posts);
