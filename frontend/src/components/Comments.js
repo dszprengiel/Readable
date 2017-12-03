@@ -34,23 +34,10 @@ class Comments extends Component {
 	}
 	editComment = (id) => {
 		this.setState({edit_id: id});
-		const temp = this.props.getComment(id);
-		console.log('temp', temp)
-		temp.then(() => {
+		const p = this.props.getComment(id);
+		p.then(() => {
 			this.setState({edit_body: this.props.comment.body, editCommentModalOpen: true})
-		})
-		
-		/*fetch(
-		    'http://localhost:3001/comments/' + id,
-		    {
-		        headers: { 'Authorization': 'readable', 'mode': 'cors' },
-		        method: 'GET'
-		    }
-		).then((response) => {if (response.ok) {return response.json();}})
-		 .then((data) => { 
-		 		console.log(data);
-		 		this.setState({edit_body: data.body, editCommentModalOpen: true});
-		 });*/
+		});
 	}
 	upVoteComment(id) {
 		this.props.vote(id, 'upVote');

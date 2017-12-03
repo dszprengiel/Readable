@@ -138,8 +138,6 @@ export function getSingleComment(id) {
 
 // up / down vote for comments
 export function upDownCommentVote(id, option) {
-  console.log(id)
-  console.log(option)
   const url = `${API}/comments/${id}`;
   const request = axios.post(url, JSON.stringify({option}), {headers: { 'Authorization': 'readable', 'mode': 'cors', 'Accept': 'application/json, text/plain, */*', 'Content-Type': 'application/json' }});
 
