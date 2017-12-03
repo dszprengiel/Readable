@@ -5,6 +5,9 @@ import Comments from './Comments';
 import Header from './Header';
 import { Redirect } from 'react-router-dom';
 import ReactModal from 'react-modal';
+import { connect } from 'react-redux';
+import { getPostDetails, editPost, deletePost, upDownVote } from '../actions';
+
 
 class PostDetail extends Component {
 	constructor(props) {
@@ -22,17 +25,7 @@ class PostDetail extends Component {
 	    	redirect: false,
 	    	comments: [],
 	    	newComment_author: '',
-	    	newComment_body: '',
-    		details: {
-    			title: '',
-    			author: '',
-    			body: '',
-    			voteScore: '',
-    			timestamp: '',
-    			category: '',
-    			id: '',
-    			commentCount: ''
-    		}
+	    	newComment_body: ''
     	};
 	}
 	closeEditPostModal = () => {
@@ -43,107 +36,36 @@ class PostDetail extends Component {
 	edit = () => {
 		this.setState({
 			editPostModalOpen: true,
-			title: this.state.details.title,
-			body: this.state.details.body
+			title: this.props.post.title,
+			body: this.props.post.body
 		});
 	}
 	delete = () => {
-		fetch(
-		    'http://localhost:3001/posts/' + this.state.details.id,
-		    {
-		        headers: { 'Authorization': 'readable', 'mode': 'cors' },
-		        method: 'DELETE'
-		    }
-		).then((response) => {if (response.ok) {this.setState({redirect: true})}});
+		this.props.deletePostDetails(this.props.post.id);
+		this.setState({redirect: true});
 	}
 	upVote(id) {
-		fetch(
-		    'http://localhost:3001/posts/' + id,
-		    {
-		        headers: { 
-		        	'Authorization': 'readable', 
-		        	'mode': 'cors',
-		        	'Accept': 'application/json, text/plain, */*',
-		        	'Content-Type': 'application/json'
-		        },
-		        method: 'POST',
-		        body: JSON.stringify({option: 'upVote'})
-		    }
-		).then((response) => {if (response.ok) {return response.json();}})
-	  .then((data) => { 
-	  	this.getPostDetails();
-	  	
-	  	
-	  });
+		this.props.vote(id, 'upVote');
+		this.props.getPost(this.props.match.params.id);
 	}
 	downVote(id) {
-		fetch(
-		    'http://localhost:3001/posts/' + id,
-		    {
-		        headers: { 
-		        	'Authorization': 'readable', 
-		        	'mode': 'cors',
-		        	'Accept': 'application/json, text/plain, */*',
-		        	'Content-Type': 'application/json'
-		        },
-		        method: 'POST',
-		        body: JSON.stringify({option: 'downVote'})
-		    }
-		).then((response) => {if (response.ok) {return response.json();}})
-	  .then((data) => { 
-	  	this.getPostDetails();
-	  });
+		this.props.vote(id, 'downVote');
+		this.props.getPost(this.props.match.params.id);
 	}
-	getPostDetails = () => {
-		  fetch(
-		      'http://localhost:3001/posts/' + this.props.match.params.id,
-		      {
-		          headers: { 'Authorization': 'readable', 'mode': 'cors' }
-		      }
-		  ).then((response) => {if (response.ok) {return response.json();}})
-		  .then((data) => { 
-		  	this.setState({details: data});
-		  	//if ( data.commentCount > 0 ) this.getComments();
-			});
-	}
+	
 	handleSubmit = (e) => {
 		e.preventDefault();
-			fetch(
-			    'http://localhost:3001/posts/' + this.state.details.id,
-			    {
-			        headers: { 
-			        	'Authorization': 'readable', 
-			        	'mode': 'cors',
-			        	'Accept': 'application/json, text/plain, */*',
-			        	'Content-Type': 'application/json'
-			        },
-			        method: 'PUT',
-			        body: JSON.stringify({title: this.state.title, body: this.state.body})
-			    }
-			).then((response) => {if (response.ok) {return response.json();}})
-		  .then((data) => { 
-		  	this.setState({
-		  		details: data,
-		  		editPostModalOpen: false
-		  	})
-
-		  });
+		this.props.editDetails(this.props.post.id, JSON.stringify({title: this.state.title, body: this.state.body}));
+		this.closeEditPostModal();
+		this.props.getPost(this.props.match.params.id);
 	}
 	componentDidMount() {
 	  
-	  this.getPostDetails();
-
-	  fetch(
-	      'http://localhost:3001/categories',
-	      {
-	          headers: { 'Authorization': 'readable', 'mode': 'cors' }
-	      }
-	  ).then((response) => {if (response.ok) {return response.json();}})
-	  .then((data) => { this.setState({categories: data.categories})});
+	  this.props.getPost(this.props.match.params.id);
 
 	}
 	render() {
-		const { title, body, author, voteScore, timestamp, category, id, commentCount } = this.state.details;
+		const { title, body, author, voteScore, timestamp, category, id, commentCount } = this.props.post;
 		const readable_date = new Date(timestamp).toLocaleString();
 		const { editPostModalOpen } = this.state;
 		const { redirect } = this.state;
@@ -161,7 +83,7 @@ class PostDetail extends Component {
 			        </div>
 			        <div className="ui padded grid">
 			          <div className="two wide computer sixteen wide mobile column">
-			              <DisplayCategories />
+			              <DisplayCategories cat={category} />
 			          </div>
 			          <div className="twelve wide computer sixteen wide mobile column postDetail">
 	 		             <div className="midcol unvoted">
@@ -187,19 +109,6 @@ class PostDetail extends Component {
 			                	 						<div className="column rendered-example collections-form-variations-form-example-inverted">
 			                								<div className="ui inverted segment">
 			                									<form className="ui inverted form" onSubmit={this.handleSubmit}>
-			                											{
-			                												this.state.type === 'success' ?
-
-			                													<div className="ui success message">
-			                														<div className="content">
-			                															<div className="header">Form Completed</div>
-			                															<p>You're all signed up for the newsletter</p>
-			                														</div>
-			                													</div>
-
-			                													: ''
-			                											
-			                											}
 			                											<div className="field">
 			                												<label>Title</label>
 			                												<div className="ui input"><input type="text" placeholder="Title" onChange={ (e) => this.setState({ title: e.target.value }) } value={this.state.title} /></div>
@@ -219,4 +128,20 @@ class PostDetail extends Component {
 	}
 }
 
-export default PostDetail;
+const mapStateToProps = ({post}, ownProps) => {
+	return {
+		post,
+		match: ownProps.match
+	}
+};
+
+const mapDispatchToProps = (dispatch) => {
+    return {
+    		getPost: (id) => dispatch(getPostDetails(id)),
+    		editDetails: (id, data) => dispatch(editPost(id, data)),
+    		deletePostDetails: (id) => dispatch(deletePost(id)),
+        vote: (id, options) => dispatch(upDownVote(id, options))
+    };
+};
+
+export default connect(mapStateToProps, mapDispatchToProps)(PostDetail);

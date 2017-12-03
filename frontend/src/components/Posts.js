@@ -1,7 +1,7 @@
 import React, { Component } from 'react';
 import { NavLink } from 'react-router-dom';
 import { connect } from 'react-redux';
-import { postsFetchData, upDownVote, sortedByScore, sortedByTimestamp } from '../actions';
+import { fetchAllPosts, fetchAllPostsTimestamp, upDownVote } from '../actions';
 
 class Posts extends Component {
 	constructor(props) {
@@ -16,36 +16,28 @@ class Posts extends Component {
 	    };
 	}
 	componentDidMount() {
-	  /*fetch(
-	      'http://localhost:3001/posts',
-	      {
-	          headers: { 'Authorization': 'readable', 'mode': 'cors' }
-	      }
-	  ).then((response) => {if (response.ok) {return response.json();}})
-	  .then((data) => { 
-	  	this.setState({posts: data});
-	  	let sorted = this.state.posts.sort(function(a,b) {return (a.voteScore > b.voteScore) ? -1 : ((b.voteScore > a.voteScore) ? 1 : 0);} );
-	  	this.setState({posts: sorted})
-	  });*/
 	  this.props.fetchData();
 	}
 	upVote(id) {
-		this.props.voteUpDown(id, 'upVote');
-		this.props.fetchData();
+		this.props.vote(id, 'upVote');
+		if ( this.state.sort === 'score' ) this.props.fetchData();
+		else this.props.fetchDataTimestamp();
 	}
 	downVote(id) {
-		this.props.voteUpDown(id, 'downVote');
-		this.props.fetchData();
+		this.props.vote(id, 'downVote');
+		if ( this.state.sort === 'score' ) this.props.fetchData();
+		else this.props.fetchDataTimestamp();
 	}
 	sortByScore = (e) => {
 		if (e) e.preventDefault();
-		this.props.sortScore(this.props.posts);
+		this.props.fetchData();
+		this.setState({sort: 'score'})
 	}
 	sortByTimestamp = (e) => {
 		e.preventDefault();
 		if ( this.state.sort === 'timestamp' ) return;
-		let sorted = this.state.posts.sort(function(a,b) {return (a.timestamp > b.timestamp) ? -1 : ((b.timestamp > a.timestamp) ? 1 : 0);} );
-		this.setState({posts: sorted, sort: 'timestamp'})
+		this.props.fetchDataTimestamp();
+		this.setState({sort: 'timestamp'})
 	}
 	render() {
 		return (
@@ -82,18 +74,17 @@ class Posts extends Component {
 	}
 }
 
-const mapStateToProps = (state) => {
+const mapStateToProps = ({posts}) => {
 	return {
-		posts: state.posts
+		posts
 	}
 };
 
 const mapDispatchToProps = (dispatch) => {
     return {
-        fetchData: () => dispatch(postsFetchData()),
-        voteUpDown: (id, option) => dispatch(upDownVote(id, option)),
-        sortScore: (posts) => dispatch(sortedByScore(posts)),
-        sortTimestamp: (posts) => dispatch(sortedByTimestamp(posts))
+        fetchData: () => dispatch(fetchAllPosts()),
+        fetchDataTimestamp: () => dispatch(fetchAllPostsTimestamp()),
+        vote: (id, options) => dispatch(upDownVote(id, options))
     };
 };
 

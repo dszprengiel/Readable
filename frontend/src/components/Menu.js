@@ -2,13 +2,14 @@ import React, { Component } from 'react';
 import { NavLink } from 'react-router-dom';
 import ReactModal from 'react-modal';
 import uuid from 'uuid/v4';
+import { connect } from 'react-redux';
+import { fetchAllPosts, fetchAllCategories, addPost } from '../actions';
 
 class Menu extends Component {
 	constructor(props) {
 	    super(props);
 	    this.state = {
 	    	newPostModalOpen: false,
-	      categories: [],
 	      title: '',
 	      author: '',
 	      body: '',
@@ -23,8 +24,13 @@ class Menu extends Component {
 		this.setState({
 			newPostModalOpen: false,
 			type: '',
-			error: false
-		})
+			error: false,
+			title: '', 
+			body: '', 
+			author: '', 
+			category: ''
+		});
+		this.props.fetchPosts();
 	}
 	handleSubmit(e) {
 		e.preventDefault();
@@ -46,34 +52,15 @@ class Menu extends Component {
 			deleted: false
 		}
 		// Send the form data.
-		  var xmlhttp = new XMLHttpRequest();
-		  var _this = this;
-		  xmlhttp.onreadystatechange = function() {
-		    if (xmlhttp.readyState === 4) {
-		      if (xmlhttp.status === 200 && xmlhttp.statusText === 'OK') {
-		        _this.setState({ type: 'success', title: '', body: '', author: '', category: '' });
-		      }
-		      else {
-		        _this.setState({ type: 'danger' });
-		      }
-		    }
-		  };
-		  xmlhttp.open('POST', 'http://localhost:3001/posts', true);
-		  xmlhttp.setRequestHeader('Content-type', 'application/json');
-		  xmlhttp.setRequestHeader('Authorization', 'readable');
-		  xmlhttp.send(JSON.stringify(formData));
+		this.props.createPost(JSON.stringify(formData));
+		this.closeNewPostModal();
 	}
 	componentDidMount() {
-	  fetch(
-	      'http://localhost:3001/categories',
-	      {
-	          headers: { 'Authorization': 'readable', 'mode': 'cors' }
-	      }
-	  ).then((response) => {if (response.ok) {return response.json();}})
-	  .then((data) => { this.setState({categories: data.categories})});
+		this.props.fetchData();
 	}
 	render() {
 		const { newPostModalOpen } = this.state
+
 		return (
 			<div className="ui large inverted pointing secondary menu">
 			  <NavLink
@@ -86,7 +73,6 @@ class Menu extends Component {
 			  </NavLink>
 			  <NavLink
 			      to='#'
-			      //isActive={(match, location) => {if(match.url === '/post/new' && match.isExact) return true;}}
 			      activeClassName="active item"
 			      className="item"
 			      onClick={ () => {this.setState({newPostModalOpen: true})} }
@@ -103,33 +89,7 @@ class Menu extends Component {
         	          <div className="twelve wide computer sixteen wide mobile column">
         	 						<div className="column rendered-example collections-form-variations-form-example-inverted">
         								<div className="ui inverted segment">
-        									<form className={`ui inverted form ${this.state.error ? 'error' : ''} ${this.state.type === 'success' ? 'success' : 'error'}`} onSubmit={this.handleSubmit}>
-        											{
-        												this.state.type === 'success' ?
-
-        													<div className="ui success message">
-        														<div className="content">
-        															<div className="header">Form Submitted</div>
-        															<p>The post has been submitted. Thanks!</p>
-        														</div>
-        													</div>
-
-        													: ''
-        											
-        											}
-        											{
-        												this.state.type === 'danger' ?
-
-        													<div className="ui success message">
-        														<div className="content">
-        															<div className="header">Error</div>
-        															<p>Sorry, there has been an error. Please try again later.</p>
-        														</div>
-        													</div>
-
-        													: ''
-        											
-        											}
+        									<form className={`ui inverted form ${this.state.error ? 'error' : ''}`} onSubmit={this.handleSubmit}>
         											{
         												this.state.error ?
         												<div className="ui error message">
@@ -157,7 +117,7 @@ class Menu extends Component {
         												<select onChange={ (e) => this.setState({ category: e.target.value }) } value={this.state.category}>
         													<option value="">Select category</option>
         													{
-        														this.state.categories.map((category) => (
+        														this.props.categories.map((category) => (
         																<option key={category.name} value={category.name}>{category.name}</option>											
         														))
         													}
@@ -175,4 +135,18 @@ class Menu extends Component {
 
 }
 
-export default Menu
+const mapStateToProps = ({categories}) => {
+	return {
+		categories
+	}
+};
+
+const mapDispatchToProps = (dispatch) => {
+    return {
+    		fetchPosts: () => dispatch(fetchAllPosts()),
+        fetchData: () => dispatch(fetchAllCategories()),
+        createPost: (data) => dispatch(addPost(data))
+    };
+};
+
+export default connect(mapStateToProps, mapDispatchToProps)(Menu);

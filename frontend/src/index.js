@@ -8,9 +8,9 @@ import { BrowserRouter as Router, Route } from 'react-router-dom';
 import { createStore, applyMiddleware } from 'redux';
 import rootReducer from './reducers'; 
 import { Provider } from 'react-redux';
-import thunk from 'redux-thunk';
+import promiseMiddleware from 'redux-promise';
 
-const store = createStore(rootReducer, applyMiddleware(thunk));
+const store = createStore(rootReducer, applyMiddleware(promiseMiddleware));
 
 ReactDOM.render(
 	<Provider store={store}>

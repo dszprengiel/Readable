@@ -1,109 +1,183 @@
+import axios from 'axios';
+
+export const API = 'http://localhost:3001'
+
 export const CATEGORIES_FETCH_DATA_SUCCESS = 'CATEGORIES_FETCH_DATA_SUCCESS'
 export const POSTS_FETCH_DATA_SUCCESS = 'POSTS_FETCH_DATA_SUCCESS'
-export const SORT_BY_SCORE = 'SORT_BY_SCORE'
-export const SORT_BY_TIMESTAMP = 'SORT_BY_TIMESTAMP'
-export const VOTE_POST_FETCH_DATA_SUCCESS = 'VOTE_POST_FETCH_DATA_SUCCESS'
+export const POST_FETCH_DATA_SUCCESS = 'POST_FETCH_DATA_SUCCESS'
+export const EDIT_POST_SUCCESS = 'EDIT_POST_SUCCESS'
+export const DELETE_POST_SUCCESS = 'DELETE_POST_SUCCESS'
+export const POSTS_FETCH_DATA_SUCCESS_TIMESTAMP = 'POSTS_FETCH_DATA_SUCCESS_TIMESTAMP'
+export const VOTE_UPDOWN_SUCCESS = 'VOTE_UPDOWN_SUCCESS'
+export const ADD_POST_DATA_SUCCESS = 'ADD_POST_DATA_SUCCESS'
+export const COMMENTS_FETCH_DATA_SUCCESS = 'COMMENTS_FETCH_DATA_SUCCESS'
+export const COMMENT_FETCH_DATA_SUCCESS = 'COMMENT_FETCH_DATA_SUCCESS'
+export const COMMENT_VOTE_UPDOWN_SUCCESS = 'COMMENT_VOTE_UPDOWN_SUCCESS'
+export const EDIT_COMMENT_SUCCESS = 'EDIT_COMMENT_SUCCESS'
+export const DELETE_COMMENT_SUCCESS = 'DELETE_COMMENT_SUCCESS'
+export const ADD_COMMENT_DATA_SUCCESS = 'ADD_COMMENT_DATA_SUCCESS'
 
-export function categoriesFetchDataSuccess(data) {
-  const categories = data.categories;
-    return {
-        type: 'CATEGORIES_FETCH_DATA_SUCCESS',
-        'categories' : categories
-    };
-}
-
-export function itemsFetchData(url) {
-    return (dispatch) => {
-
-        fetch(url,
-          {
-              headers: { 'Authorization': 'readable', 'mode': 'cors' }
-          }
-        )
-            .then((response) => {
-                if (!response.ok) {
-                    throw Error(response.statusText);
-                }
-
-                return response;
-            })
-            .then((response) => response.json())
-            .then((items) => dispatch(categoriesFetchDataSuccess(items)))
-    };
-}
 //get all posts
-export function postsFetchDataSuccess(data) {
+export function fetchAllPosts() {
+  const url = `${API}/posts`;
+  const request = axios.get(url, {
+    headers: { 'Authorization': 'readable', 'mode': 'cors' }
+  });
+
   return {
-      type: 'POSTS_FETCH_DATA_SUCCESS',
-      'posts' : data
-  };
-}
-
-export function postsFetchData() {
-    return (dispatch) => {
-
-      fetch(
-          'http://localhost:3001/posts',
-          {
-              headers: { 'Authorization': 'readable', 'mode': 'cors' }
-          }
-      ).then((response) => {
-                if (!response.ok) {
-                    throw Error(response.statusText);
-                }
-
-                return response;
-            })
-      .then((response) => response.json())
-      .then((posts) => dispatch(postsFetchDataSuccess(posts)));
-    };
-}
-//sorting
-export function sortedByScore(data) {
-  return {
-    type: 'SORT_BY_SCORE',
-    text: 'posts',
-    'posts': data
+    type: POSTS_FETCH_DATA_SUCCESS,
+    payload: request
   }
 }
-export function sortedByTimestamp(data) {
+export function fetchAllPostsTimestamp() {
+  const url = `${API}/posts`;
+  const request = axios.get(url, {
+    headers: { 'Authorization': 'readable', 'mode': 'cors' }
+  });
+
   return {
-    type: 'SORT_BY_TIMESTAMP',
-    'posts': data
+    type: POSTS_FETCH_DATA_SUCCESS_TIMESTAMP,
+    payload: request
   }
 }
 
-//up down vote
-export function changePostVoteSuccess(data) {
+//get post details
+export function getPostDetails(id) {
+  const url = `${API}/posts/${id}`;
+  const request = axios.get(url, {
+    headers: { 'Authorization': 'readable', 'mode': 'cors' }
+  });
+
   return {
-      type: 'VOTE_POST_FETCH_DATA_SUCCESS',
-      'post' : data
-  };
+    type: POST_FETCH_DATA_SUCCESS,
+    payload: request
+  }
 }
+
+//get all categories
+export function fetchAllCategories(data) {
+  const url = `${API}/categories`;
+  const request = axios.get(url, {
+    headers: { 'Authorization': 'readable', 'mode': 'cors' }
+  });
+
+  return {
+    type: CATEGORIES_FETCH_DATA_SUCCESS,
+    payload: request
+  }
+}
+
+// up / down vote
 export function upDownVote(id, option) {
-  return (dispatch) => {
+  const url = `${API}/posts/${id}`;
+  const request = axios.post(url, JSON.stringify({option}), {headers: { 'Authorization': 'readable', 'mode': 'cors', 'Accept': 'application/json, text/plain, */*', 'Content-Type': 'application/json' }});
 
-      fetch(
-          'http://localhost:3001/posts/' + id,
-          {
-              headers: { 
-                'Authorization': 'readable', 
-                'mode': 'cors',
-                'Accept': 'application/json, text/plain, */*',
-                'Content-Type': 'application/json'
-              },
-              method: 'POST',
-              body: JSON.stringify({option})
-          }
-      ).then((response) => {
-                if (!response.ok) {
-                    throw Error(response.statusText);
-                }
+  return {
+    type: VOTE_UPDOWN_SUCCESS,
+    payload: request
+  }
+}
 
-                return response;
-            })
-      .then((response) => response.json())
-      .then((post) => dispatch(changePostVoteSuccess(post)));
+// create new post
+export function addPost(formData) {
+  const url = `${API}/posts`;
+  const request = axios.post(url, formData, {headers: { 'Authorization': 'readable', 'mode': 'cors', 'Accept': 'application/json, text/plain, */*', 'Content-Type': 'application/json' }});
 
+  return {
+    type: ADD_POST_DATA_SUCCESS,
+    payload: request
+  }
+}
+
+// edit post
+export function editPost(id, formData) {
+  const url = `${API}/posts/${id}`;
+  const request = axios.put(url, formData, {headers: { 'Authorization': 'readable', 'mode': 'cors', 'Accept': 'application/json, text/plain, */*', 'Content-Type': 'application/json' }});
+
+  return {
+    type: ADD_POST_DATA_SUCCESS,
+    payload: request
+  }
+}
+
+//delete post
+export function deletePost(id, formData) {
+  const url = `${API}/posts/${id}`;
+  const request = axios.delete(url, {headers: { 'Authorization': 'readable', 'mode': 'cors', 'Accept': 'application/json, text/plain, */*', 'Content-Type': 'application/json' }});
+
+  return {
+    type: DELETE_POST_SUCCESS,
+    payload: request
+  }
+}
+
+//get all comments for a post
+export function getAllComments(postId) {
+  const url = `${API}/posts/${postId}/comments`;
+  const request = axios.get(url, {
+    headers: { 'Authorization': 'readable', 'mode': 'cors' }
+  });
+
+  return {
+    type: COMMENTS_FETCH_DATA_SUCCESS,
+    payload: request
+  }
+}
+
+export function getSingleComment(id) {
+  const url = `${API}/comments/${id}`;
+  const request = axios.get(url, {
+    headers: { 'Authorization': 'readable', 'mode': 'cors' }
+  });
+
+  return {
+    type: COMMENT_FETCH_DATA_SUCCESS,
+    payload: request
+  }
+}
+
+// up / down vote for comments
+export function upDownCommentVote(id, option) {
+  console.log(id)
+  console.log(option)
+  const url = `${API}/comments/${id}`;
+  const request = axios.post(url, JSON.stringify({option}), {headers: { 'Authorization': 'readable', 'mode': 'cors', 'Accept': 'application/json, text/plain, */*', 'Content-Type': 'application/json' }});
+
+  return {
+    type: VOTE_UPDOWN_SUCCESS,
+    payload: request
+  }
+}
+
+// edit comment
+export function editComment(id, formData) {
+  const url = `${API}/comments/${id}`;
+  const request = axios.put(url, formData, {headers: { 'Authorization': 'readable', 'mode': 'cors', 'Accept': 'application/json, text/plain, */*', 'Content-Type': 'application/json' }});
+
+  return {
+    type: EDIT_COMMENT_SUCCESS,
+    payload: request
+  }
+}
+
+//delete comment
+export function deleteComment(id, formData) {
+  const url = `${API}/comments/${id}`;
+  const request = axios.delete(url, {headers: { 'Authorization': 'readable', 'mode': 'cors', 'Accept': 'application/json, text/plain, */*', 'Content-Type': 'application/json' }});
+
+  return {
+    type: DELETE_COMMENT_SUCCESS,
+    payload: request
+  }
+}
+
+// create new comment
+export function addComment (formData) {
+  const url = `${API}/comments`;
+  const request = axios.post(url, formData, {headers: { 'Authorization': 'readable', 'mode': 'cors', 'Accept': 'application/json, text/plain, */*', 'Content-Type': 'application/json' }});
+
+  return {
+    type: ADD_COMMENT_DATA_SUCCESS,
+    payload: request
   }
 }

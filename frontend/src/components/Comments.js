@@ -1,13 +1,14 @@
 import React, { Component } from 'react';
 import ReactModal from 'react-modal';
 import uuid from 'uuid/v4';
+import { connect } from 'react-redux';
+import { getAllComments, upDownCommentVote, editComment, deleteComment, addComment, getSingleComment } from '../actions';
 
 class Comments extends Component {
 		constructor(props) {
 		    super(props);
 		    this.state = {
 		    	editCommentModalOpen: false,
-		    	categories: [],
 		    	title: '',
 		    	author: '',
 		    	body: '',
@@ -18,9 +19,8 @@ class Comments extends Component {
 		    	redirect: false,
 		    	edit_body: '',
 		    	edit_id: '',
-		    	comments: [],
 		    	newComment_author: '',
-		    	newComment_body: '',
+		    	newComment_body: ''
 	    	};
 		}
 	closeEditCommentModal = () => {
@@ -29,24 +29,18 @@ class Comments extends Component {
 		})
 	}
 	deleteComment = (id) => {
-		fetch(
-		    'http://localhost:3001/comments/' + id,
-		    {
-		        headers: { 'Authorization': 'readable', 'mode': 'cors' },
-		        method: 'DELETE'
-		    }
-		).then((response) => {if (response.ok) {return response.json();}})
-		 .then((data) => { 
-		 	let comments = this.state.comments;
-		 	comments = comments.filter((c) => {
-		 		return c.id !== data.id;
-		 	});
-		 	this.setState({comments})
-		 });
+		this.props.deleteComment(id);
+		this.props.getComments(this.props.postId);
 	}
 	editComment = (id) => {
 		this.setState({edit_id: id});
-		fetch(
+		const temp = this.props.getComment(id);
+		console.log('temp', temp)
+		temp.then(() => {
+			this.setState({edit_body: this.props.comment.body, editCommentModalOpen: true})
+		})
+		
+		/*fetch(
 		    'http://localhost:3001/comments/' + id,
 		    {
 		        headers: { 'Authorization': 'readable', 'mode': 'cors' },
@@ -56,68 +50,25 @@ class Comments extends Component {
 		 .then((data) => { 
 		 		console.log(data);
 		 		this.setState({edit_body: data.body, editCommentModalOpen: true});
-		 });
+		 });*/
 	}
 	upVoteComment(id) {
-		fetch(
-		    'http://localhost:3001/comments/' + id,
-		    {
-		        headers: { 
-		        	'Authorization': 'readable', 
-		        	'mode': 'cors',
-		        	'Accept': 'application/json, text/plain, */*',
-		        	'Content-Type': 'application/json'
-		        },
-		        method: 'POST',
-		        body: JSON.stringify({option: 'upVote'})
-		    }
-		).then((response) => {if (response.ok) {return response.json();}})
-	  .then((data) => { 
-	  	const items = this.state.comments.map((c) => {
-	  		if ( c.id === data.id ) {
-	  			return data;
-	  		}
-	  		else {
-	  			return c;
-	  		}
-	  	});
-	  	this.setState({comments: items});
-	  	let sorted = this.state.comments.sort(function(a,b) {return (a.voteScore > b.voteScore) ? -1 : ((b.voteScore > a.voteScore) ? 1 : 0);} );
-	  	this.setState({comments: sorted})
-
-	  	
-	  });
+		this.props.vote(id, 'upVote');
+		this.props.getComments(this.props.postId);
 	}
 	downVoteComment(id) {
-		fetch(
-		    'http://localhost:3001/comments/' + id,
-		    {
-		        headers: { 
-		        	'Authorization': 'readable', 
-		        	'mode': 'cors',
-		        	'Accept': 'application/json, text/plain, */*',
-		        	'Content-Type': 'application/json'
-		        },
-		        method: 'POST',
-		        body: JSON.stringify({option: 'downVote'})
-		    }
-		).then((response) => {if (response.ok) {return response.json();}})
-	  .then((data) => { 
-	  	const items = this.state.comments.map((c) => {
-  		if ( c.id === data.id ) {
-  			return data;
-  		}
-  		else {
-  			return c;
-  		}
-  	});
-  	this.setState({comments: items});
-  	let sorted = this.state.comments.sort(function(a,b) {return (a.voteScore > b.voteScore) ? -1 : ((b.voteScore > a.voteScore) ? 1 : 0);} );
-  	this.setState({comments: sorted})
-	  });
+		this.props.vote(id, 'downVote');
+		this.props.getComments(this.props.postId);
+
 	}
 	handleCommentSubmit = (e) => {
 			e.preventDefault();
+			const { newComment_body, newComment_author } = this.state;
+			if ( newComment_body === '' || newComment_author === '' ) {
+				this.setState({error: true});
+				return;
+			}
+
 			let formData = {
 				id: uuid(),
 				timestamp: Date.now(),
@@ -125,66 +76,24 @@ class Comments extends Component {
 				author: this.state.newComment_author,
 				parentId: this.props.postId
 			};
-			fetch(
-			    'http://localhost:3001/comments',
-			    {
-			        headers: { 
-			        	'Authorization': 'readable', 
-			        	'mode': 'cors',
-			        	'Accept': 'application/json, text/plain, */*',
-			        	'Content-Type': 'application/json'
-			        },
-			        method: 'POST',
-			        body: JSON.stringify(formData)
-			    }
-			).then((response) => {if (response.ok) {return response.json();}})
-		  .then((data) => { 
-		  	
-		  	this.setState({
-		  		newComment_author: '',
-		  		newComment_body: ''
-		  	});
-		  	this.getComments();
-		  });
+
+			this.props.newComment(JSON.stringify(formData));
+			this.props.getComments(this.props.postId);
+
+			this.setState({
+				newComment_author: '',
+				newComment_body: ''
+			});
 	}
-	getComments = () => {
-		fetch(
-		    'http://localhost:3001/posts/' + this.props.postId + '/comments',
-		    {
-		        headers: { 'Authorization': 'readable', 'mode': 'cors' }
-		    }
-		).then((response) => {if (response.ok) {return response.json();}})
-		.then((data) => { 
-			this.setState({comments: data});
-			let sorted = this.state.comments.sort(function(a,b) {return (a.voteScore > b.voteScore) ? -1 : ((b.voteScore > a.voteScore) ? 1 : 0);} );
-			this.setState({comments: sorted})
-		});
-	}
+	
 	updateComment = (e) => {
 		  e.preventDefault();
-		  console.log(this.state.edit_body)
-			fetch(
-			    'http://localhost:3001/comments/' + this.state.edit_id,
-			    {
-			        headers: { 
-			        	'Authorization': 'readable', 
-			        	'mode': 'cors',
-			        	'Accept': 'application/json, text/plain, */*',
-			        	'Content-Type': 'application/json'
-			        },
-			        method: 'PUT',
-			        body: JSON.stringify({timestamp: Date.now(), body: this.state.edit_body})
-			    }
-			).then((response) => {if (response.ok) {return response.json();}})
-		  .then((data) => { 
-		  	this.setState({
-		  		editCommentModalOpen: false
-		  	})
-		  	this.getComments();
-		  });
+		  this.props.editDetails(this.state.edit_id, JSON.stringify({timestamp: Date.now(), body: this.state.edit_body}));
+		  this.props.getComments(this.props.postId);
+		  this.closeEditCommentModal();
 	}
 	componentDidMount() {
-		this.getComments();
+		this.props.getComments(this.props.postId);
 	}
 	render() {
 		const { editCommentModalOpen } = this.state;
@@ -204,10 +113,10 @@ class Comments extends Component {
 	     		<button type="submit" className="ui button">Submit</button>
 	     	</form>
 	     	<div id="comments">
-	     		<p className="caption">{this.state.comments.length} Comments</p>
+	     		<p className="caption">{this.props.comments.length} Comments</p>
 	        <ul>
 	        {
-	        	this.state.comments.map((comment) => (
+	        	this.props.comments.map((comment) => (
 	        		<li className="comment" key={comment.id}>
  		             <div className="midcol unvoted">
 										<div className="arrow up" onClick={() => this.upVoteComment(comment.id)} data-event-action="upvote" role="button" aria-label="upvote"></div>
@@ -261,4 +170,25 @@ class Comments extends Component {
 	}
 }
 
-export default Comments
+const mapStateToProps = ({comments, comment}, ownProps) => {
+	return {
+		comments,
+		comment,
+		count: ownProps.count,
+		postId: ownProps.postId
+	}
+};
+
+const mapDispatchToProps = (dispatch) => {
+    return {
+    		getComments: (id) => dispatch(getAllComments(id)),
+    		vote: (id, options) => dispatch(upDownCommentVote(id, options)),
+    		editDetails: (id, data) => dispatch(editComment(id, data)),
+    		newComment: (data) => dispatch(addComment(data)),
+    		deleteComment: (id) => dispatch(deleteComment(id)),
+    		getComment: (id) => dispatch(getSingleComment(id))
+        
+    };
+};
+
+export default connect(mapStateToProps, mapDispatchToProps)(Comments);

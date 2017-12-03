@@ -4,8 +4,7 @@ import DisplayCategories from './components/DisplayCategories';
 import Posts from './components/Posts';
 import Menu from './components/Menu';
 import Header from './components/Header';
-import { connect } from 'react-redux';
-import { addRecipe, removeFromCalendar } from './actions';
+
 
 
 class App extends Component {
@@ -20,7 +19,7 @@ class App extends Component {
         </div>
         <div className="ui padded grid">
           <div className="two wide computer sixteen wide mobile column">
-              <DisplayCategories />
+              <DisplayCategories cat={this.props.match.params.filter} />
           </div>
           <div className="twelve wide computer sixteen wide mobile column">
               <Posts cat={this.props.match.params.filter} />

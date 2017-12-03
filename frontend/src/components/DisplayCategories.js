@@ -1,13 +1,12 @@
 import React, { Component } from 'react';
 import { NavLink } from 'react-router-dom';
 import { connect } from 'react-redux';
-import { itemsFetchData } from '../actions';
+import { fetchAllCategories } from '../actions';
 
 class DisplayCategories extends Component {
 	componentDidMount() {
-      this.props.fetchData('http://localhost:3001/categories');
+      this.props.fetchData();
   }
-	
 	render() {
 		return (
 			<div>
@@ -18,8 +17,9 @@ class DisplayCategories extends Component {
 
 								<NavLink
 										key={category.name}
-								    to={category.path === 'SHOW_ALL' ? '/' : `/${ category.path }/`}
+								    to={`/${ category.path }/`}
 								    className='ui button huge'
+								    isActive={()=>this.props.cat === category.path ? true : false}
 								    activeStyle={{
 								      color: 'white'
 								    }}
@@ -36,15 +36,16 @@ class DisplayCategories extends Component {
 	}
 }
 
-const mapStateToProps = (state) => {
+const mapStateToProps = ({categories}, ownProps) => {
 	return {
-		categories: state.categories
+		categories,
+		cat: ownProps.cat
 	}
 };
 
 const mapDispatchToProps = (dispatch) => {
     return {
-        fetchData: (url) => dispatch(itemsFetchData(url))
+        fetchData: () => dispatch(fetchAllCategories())
     };
 };
 
