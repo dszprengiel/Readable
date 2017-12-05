@@ -25,8 +25,6 @@ function categories (state = [], action) {
 }
 
 function posts (state = [], action) {
-  console.log(state)
-  console.log(action)
   switch (action.type) {
     case POSTS_FETCH_DATA_SUCCESS :
       return action.payload.data;
