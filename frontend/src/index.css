@@ -57,6 +57,9 @@ body {
 	color: orange;
 	text-decoration: underline;
 }
+.ui.cards>.card>.content p.author {
+  margin-bottom:  0;
+}
 .timestamp {
 	font-size:  80%;
 }
@@ -103,10 +106,6 @@ body {
 
 .midcol .score.likes, .score.dislikes {
     display: none;
-}
-
-.ui.card>.content>.header, .ui.cards>.card>.content>.header {
-	margin-top: 8px !important;
 }
 
 #comments {

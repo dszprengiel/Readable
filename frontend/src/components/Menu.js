@@ -3,7 +3,7 @@ import { NavLink } from 'react-router-dom';
 import ReactModal from 'react-modal';
 import uuid from 'uuid/v4';
 import { connect } from 'react-redux';
-import { fetchAllPosts, fetchAllCategories, addPost } from '../actions';
+import { fetchAllCategories, addPost } from '../actions';
 
 class Menu extends Component {
 	constructor(props) {
@@ -30,7 +30,6 @@ class Menu extends Component {
 			author: '', 
 			category: ''
 		});
-		this.props.fetchPosts();
 	}
 	handleSubmit(e) {
 		e.preventDefault();
@@ -143,7 +142,6 @@ const mapStateToProps = ({categories}) => {
 
 const mapDispatchToProps = (dispatch) => {
     return {
-    		fetchPosts: () => dispatch(fetchAllPosts()),
         fetchData: () => dispatch(fetchAllCategories()),
         createPost: (data) => dispatch(addPost(data))
     };

@@ -18,34 +18,33 @@ class Posts extends Component {
 	componentDidMount() {
 	  this.props.fetchData();
 	}
+	sorted = (posts) => {
+		const { sort } = this.state;
+		return (sort === 'score' ) ? posts.sort(function(a,b) {return (a.voteScore > b.voteScore) ? -1 : ((b.voteScore > a.voteScore) ? 1 : 0);} ) : posts.sort(function(a,b) {return (a.timestamp > b.timestamp) ? -1 : ((b.timestamp > a.timestamp) ? 1 : 0);} )
+	}
 	upVote(id) {
 		this.props.vote(id, 'upVote');
-		if ( this.state.sort === 'score' ) this.props.fetchData();
-		else this.props.fetchDataTimestamp();
 	}
 	downVote(id) {
 		this.props.vote(id, 'downVote');
-		if ( this.state.sort === 'score' ) this.props.fetchData();
-		else this.props.fetchDataTimestamp();
 	}
 	sortByScore = (e) => {
 		if (e) e.preventDefault();
-		this.props.fetchData();
 		this.setState({sort: 'score'})
 	}
 	sortByTimestamp = (e) => {
-		e.preventDefault();
-		if ( this.state.sort === 'timestamp' ) return;
-		this.props.fetchDataTimestamp();
+		if (e) e.preventDefault();
 		this.setState({sort: 'timestamp'})
 	}
 	render() {
+		const { posts } = this.props
+
 		return (
 			<div>
 				<h3 className="heading">Posts <span className="sorting">Sort by: <a onClick={(e) => this.sortByScore(e)} className={this.state.sort === 'score' ? 'active': ''}>score</a>, <a onClick={(e) => this.sortByTimestamp(e)} className={this.state.sort === 'timestamp' ? 'active': ''}>timestamp</a></span></h3>
 				<div className="ui cards">
 					{
-						this.props.posts.filter(post => {
+						this.sorted(posts).filter(post => {
 							return this.props.cat ? this.props.cat === post.category : post;
 						})
 						.map((post) => (
@@ -62,6 +61,7 @@ class Posts extends Component {
 										  >
 										  {post.title} 
 										</NavLink>
+										<p className="author">By {post.author}</p>
 										<p className="timestamp">Written on {`${new Date(post.timestamp).toLocaleString()}`}</p>
 									</div> 
 								</div>

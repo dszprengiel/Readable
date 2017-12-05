@@ -8,7 +8,6 @@ import ReactModal from 'react-modal';
 import { connect } from 'react-redux';
 import { getPostDetails, editPost, deletePost, upDownVote } from '../actions';
 
-
 class PostDetail extends Component {
 	constructor(props) {
 	    super(props);
@@ -46,23 +45,18 @@ class PostDetail extends Component {
 	}
 	upVote(id) {
 		this.props.vote(id, 'upVote');
-		this.props.getPost(this.props.match.params.id);
 	}
 	downVote(id) {
 		this.props.vote(id, 'downVote');
-		this.props.getPost(this.props.match.params.id);
 	}
 	
 	handleSubmit = (e) => {
 		e.preventDefault();
 		this.props.editDetails(this.props.post.id, JSON.stringify({title: this.state.title, body: this.state.body}));
 		this.closeEditPostModal();
-		this.props.getPost(this.props.match.params.id);
 	}
 	componentDidMount() {
-	  
 	  this.props.getPost(this.props.match.params.id);
-
 	}
 	render() {
 		const { title, body, author, voteScore, timestamp, category, id, commentCount } = this.props.post;
@@ -140,7 +134,7 @@ const mapDispatchToProps = (dispatch) => {
     		getPost: (id) => dispatch(getPostDetails(id)),
     		editDetails: (id, data) => dispatch(editPost(id, data)),
     		deletePostDetails: (id) => dispatch(deletePost(id)),
-        vote: (id, options) => dispatch(upDownVote(id, options))
+        vote: (id, options) => dispatch(upDownVote(id, options, true))
     };
 };
 

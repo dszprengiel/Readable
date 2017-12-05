@@ -16,6 +16,7 @@ export const COMMENT_VOTE_UPDOWN_SUCCESS = 'COMMENT_VOTE_UPDOWN_SUCCESS'
 export const EDIT_COMMENT_SUCCESS = 'EDIT_COMMENT_SUCCESS'
 export const DELETE_COMMENT_SUCCESS = 'DELETE_COMMENT_SUCCESS'
 export const ADD_COMMENT_DATA_SUCCESS = 'ADD_COMMENT_DATA_SUCCESS'
+export const DETAIL_VOTE_UPDOWN_SUCCESS = 'DETAIL_VOTE_UPDOWN_SUCCESS'
 
 //get all posts
 export function fetchAllPosts() {
@@ -68,10 +69,16 @@ export function fetchAllCategories(data) {
 }
 
 // up / down vote
-export function upDownVote(id, option) {
+export function upDownVote(id, option, detail) {
   const url = `${API}/posts/${id}`;
   const request = axios.post(url, JSON.stringify({option}), {headers: { 'Authorization': 'readable', 'mode': 'cors', 'Accept': 'application/json, text/plain, */*', 'Content-Type': 'application/json' }});
 
+  if ( detail ) {
+    return {
+      type: DETAIL_VOTE_UPDOWN_SUCCESS,
+      payload: request
+    }
+  }
   return {
     type: VOTE_UPDOWN_SUCCESS,
     payload: request
@@ -95,7 +102,7 @@ export function editPost(id, formData) {
   const request = axios.put(url, formData, {headers: { 'Authorization': 'readable', 'mode': 'cors', 'Accept': 'application/json, text/plain, */*', 'Content-Type': 'application/json' }});
 
   return {
-    type: ADD_POST_DATA_SUCCESS,
+    type: EDIT_POST_SUCCESS,
     payload: request
   }
 }
@@ -142,7 +149,7 @@ export function upDownCommentVote(id, option) {
   const request = axios.post(url, JSON.stringify({option}), {headers: { 'Authorization': 'readable', 'mode': 'cors', 'Accept': 'application/json, text/plain, */*', 'Content-Type': 'application/json' }});
 
   return {
-    type: VOTE_UPDOWN_SUCCESS,
+    type: COMMENT_VOTE_UPDOWN_SUCCESS,
     payload: request
   }
 }

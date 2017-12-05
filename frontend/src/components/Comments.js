@@ -30,7 +30,6 @@ class Comments extends Component {
 	}
 	deleteComment = (id) => {
 		this.props.deleteComment(id);
-		this.props.getComments(this.props.postId);
 	}
 	editComment = (id) => {
 		this.setState({edit_id: id});
@@ -41,12 +40,9 @@ class Comments extends Component {
 	}
 	upVoteComment(id) {
 		this.props.vote(id, 'upVote');
-		this.props.getComments(this.props.postId);
 	}
 	downVoteComment(id) {
 		this.props.vote(id, 'downVote');
-		this.props.getComments(this.props.postId);
-
 	}
 	handleCommentSubmit = (e) => {
 			e.preventDefault();
@@ -65,7 +61,6 @@ class Comments extends Component {
 			};
 
 			this.props.newComment(JSON.stringify(formData));
-			this.props.getComments(this.props.postId);
 
 			this.setState({
 				newComment_author: '',
@@ -76,7 +71,6 @@ class Comments extends Component {
 	updateComment = (e) => {
 		  e.preventDefault();
 		  this.props.editDetails(this.state.edit_id, JSON.stringify({timestamp: Date.now(), body: this.state.edit_body}));
-		  this.props.getComments(this.props.postId);
 		  this.closeEditCommentModal();
 	}
 	componentDidMount() {
@@ -84,6 +78,7 @@ class Comments extends Component {
 	}
 	render() {
 		const { editCommentModalOpen } = this.state;
+		const { comments } = this.props
 		return (
 			<div>
 	     <hr />
@@ -103,7 +98,12 @@ class Comments extends Component {
 	     		<p className="caption">{this.props.comments.length} Comments</p>
 	        <ul>
 	        {
-	        	this.props.comments.map((comment) => (
+	        	comments
+	        		.sort(function(a,b) {return (a.voteScore > b.voteScore) ? -1 : ((b.voteScore > a.voteScore) ? 1 : 0);} )
+	        		.filter((comment) => {
+	        			return !(comment.deleted)
+	        		})
+	        		.map((comment) => (
 	        		<li className="comment" key={comment.id}>
  		             <div className="midcol unvoted">
 										<div className="arrow up" onClick={() => this.upVoteComment(comment.id)} data-event-action="upvote" role="button" aria-label="upvote"></div>
