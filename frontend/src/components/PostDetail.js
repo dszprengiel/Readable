@@ -56,7 +56,11 @@ class PostDetail extends Component {
 		this.closeEditPostModal();
 	}
 	componentDidMount() {
-	  this.props.getPost(this.props.match.params.id);
+	  this.props.getPost(this.props.match.params.id).then((result) => {
+	  	if (Object.keys(result.payload.data).length === 0 && result.payload.data.constructor === Object) {
+	  		this.props.history.push('/');
+	  	}
+	  });
 	}
 	render() {
 		const { title, body, author, voteScore, timestamp, category, id, commentCount } = this.props.post;

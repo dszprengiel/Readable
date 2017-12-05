@@ -11,6 +11,17 @@ body {
 	font-size: 1.3rem;
 	margin-top: 20px;
 }
+.comment-count {
+  float: right;
+  color: gray;
+  font-size: 0.8em;
+}
+.actions {
+  clear: right;
+  float: right;
+  color: blue;
+  font-size: 0.8em;
+}
 .overlay {
   position: fixed;
   top: 0px;

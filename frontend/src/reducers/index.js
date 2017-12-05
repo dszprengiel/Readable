@@ -11,7 +11,8 @@ import {
   EDIT_COMMENT_SUCCESS,
   COMMENT_FETCH_DATA_SUCCESS,
   DETAIL_VOTE_UPDOWN_SUCCESS,
-  ADD_COMMENT_DATA_SUCCESS
+  ADD_COMMENT_DATA_SUCCESS,
+  DELETE_POST_SUCCESS
 } from '../actions'
 
 function categories (state = [], action) {
@@ -24,6 +25,8 @@ function categories (state = [], action) {
 }
 
 function posts (state = [], action) {
+  console.log(state)
+  console.log(action)
   switch (action.type) {
     case POSTS_FETCH_DATA_SUCCESS :
       return action.payload.data;
@@ -34,6 +37,15 @@ function posts (state = [], action) {
         })
     case ADD_POST_DATA_SUCCESS:
       return [...state, action.payload.data]
+    case DELETE_POST_SUCCESS:
+      return state.filter((post) => {
+        return !(post.id === action.payload.data.id)
+      })
+    case EDIT_POST_SUCCESS:
+      return state.map((post) => {
+          if ( post.id === action.payload.data.id ) return action.payload.data;
+          else return post;
+        })
     default:
       return state;
     }
@@ -74,14 +86,6 @@ function comment (state = {}, action) {
     default:
       return state;
     }
-}
-//DELETE_COMMENT_SUCCESS
-function commentupdownvote(state = {}, action) {
-  if ( action.type === COMMENT_VOTE_UPDOWN_SUCCESS ) {
-    return action.payload.data;
-  }
-
-  return state;
 }
 
 export default combineReducers({

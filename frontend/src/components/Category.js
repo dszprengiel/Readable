@@ -3,10 +3,8 @@ import DisplayCategories from './DisplayCategories';
 import Posts from './Posts'
 import { NavLink } from 'react-router-dom';
 
-
-class Category extends Component {
-  render() {
-    return (
+export default Category = () => {
+  return return (
       <div>
         <div className="ui inverted vertical center aligned segment header-wrapper">
           <div className="ui container">
@@ -44,7 +42,4 @@ class Category extends Component {
         </div>
       </div>
     );
-  }
 }
-
-export default Category;

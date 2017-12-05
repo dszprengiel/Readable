@@ -1,13 +1,18 @@
 import React, { Component } from 'react';
 import { NavLink } from 'react-router-dom';
+import ReactModal from 'react-modal';
 import { connect } from 'react-redux';
-import { fetchAllPosts, fetchAllPostsTimestamp, upDownVote } from '../actions';
+import { fetchAllPosts, editPost, deletePost, upDownVote } from '../actions';
 
 class Posts extends Component {
 	constructor(props) {
 	    super(props);
 	    this.state = {
+	    	editPostModalOpen: false,
 	      sort: 'score',
+	      title: '',
+	      body: '',
+	      id: '',
 	      colors: {
 	      	'react': 'orange',
 	      	'redux': 'yellow',
@@ -17,6 +22,24 @@ class Posts extends Component {
 	}
 	componentDidMount() {
 	  this.props.fetchData();
+	}
+	closeEditPostModal = () => {
+		this.setState({
+			editPostModalOpen: false
+		})
+	}
+	edit = (title, body, id) => {
+		this.setState({
+			editPostModalOpen: true,
+			title,
+			body,
+			id
+		});
+	}
+	handleSubmit = (e) => {
+		e.preventDefault();
+		this.props.editDetails(this.state.id, JSON.stringify({title: this.state.title, body: this.state.body}));
+		this.closeEditPostModal();
 	}
 	sorted = (posts) => {
 		const { sort } = this.state;
@@ -36,8 +59,12 @@ class Posts extends Component {
 		if (e) e.preventDefault();
 		this.setState({sort: 'timestamp'})
 	}
+	delete = (id) => {
+		this.props.deletePostDetails(id);
+	}
 	render() {
 		const { posts } = this.props
+		const { editPostModalOpen } = this.state;
 
 		return (
 			<div>
@@ -46,6 +73,9 @@ class Posts extends Component {
 					{
 						this.sorted(posts).filter(post => {
 							return this.props.cat ? this.props.cat === post.category : post;
+						})
+						.filter((post) => {
+							return !(post.deleted === true)
 						})
 						.map((post) => (
 							<div className={`ui fluid card ${this.state.colors[post.category]}`} key={post.id}>
@@ -56,6 +86,8 @@ class Posts extends Component {
 										<div className="arrow down" onClick={() => this.downVote(post.id)} data-event-action="downvote" role="button" aria-label="downvote"></div>
 									</div>
 									<div className="header">
+										<p className="comment-count">{post.commentCount} Comments</p>
+										<p className="actions"><button onClick={() => this.edit(post.title, post.body, post.id)}>Edit</button> | <button onClick={() => this.delete(post.id)}>Delete</button></p>
 										<NavLink
 										    to={`/${ post.category }/${ post.id }`}
 										  >
@@ -63,12 +95,38 @@ class Posts extends Component {
 										</NavLink>
 										<p className="author">By {post.author}</p>
 										<p className="timestamp">Written on {`${new Date(post.timestamp).toLocaleString()}`}</p>
+
 									</div> 
 								</div>
 							</div>
 						))
 					}
 				</div>
+							  <ReactModal
+				          className='modal'
+				          overlayClassName='overlay'
+				          isOpen={editPostModalOpen}
+				          onRequestClose={this.closeEditPostModal}
+				          contentLabel='Modal'
+				        >
+				        	          <div className="twelve wide computer sixteen wide mobile column">
+				        	 						<div className="column rendered-example collections-form-variations-form-example-inverted">
+				        								<div className="ui inverted segment">
+				        									<form className="ui inverted form" onSubmit={this.handleSubmit}>
+				        											<div className="field">
+				        												<label>Title</label>
+				        												<div className="ui input"><input type="text" placeholder="Title" onChange={ (e) => this.setState({ title: e.target.value }) } value={this.state.title} /></div>
+				        											</div>
+				        											<div className="field">
+				        												<label>Post Body</label>
+				        												<div className="ui input"><input type="text" placeholder="Post Body" onChange={ (e) => this.setState({ body: e.target.value }) } value={this.state.body} /></div>
+				        											</div>
+				        										<button type="submit" className="ui button">Submit</button>
+				        									</form>
+				        								</div>
+				        	 						</div>
+				        	          </div>
+				        </ReactModal>
 			</div>
 		)
 	}
@@ -83,7 +141,8 @@ const mapStateToProps = ({posts}) => {
 const mapDispatchToProps = (dispatch) => {
     return {
         fetchData: () => dispatch(fetchAllPosts()),
-        fetchDataTimestamp: () => dispatch(fetchAllPostsTimestamp()),
+        editDetails: (id, data) => dispatch(editPost(id, data)),
+        deletePostDetails: (id) => dispatch(deletePost(id)),
         vote: (id, options) => dispatch(upDownVote(id, options))
     };
 };
